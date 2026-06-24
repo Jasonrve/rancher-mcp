@@ -1,0 +1,8 @@
+node_modules
+dist
+docs/.vitepress/dist
+docs/.vitepress/config.js
+tests/*.js
+coverage
+.vitepress-cache
+.DS_Store
