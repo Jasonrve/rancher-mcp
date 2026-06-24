@@ -1,18 +1,33 @@
 {
   "name": "rancher-mcp",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
+  "version": "0.1.1-beta.0",
   "description": "Rancher-only MCP server with pass-through authorization.",
   "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "rancher-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "docs/*.md",
+    "docs/logo.svg",
+    "docs/.vitepress/config.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
   "engines": {
     "node": ">=22"
   },
-  "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "docs:dev": "vitepress dev docs",
@@ -29,6 +44,13 @@
     "vitepress": "^1.6.3",
     "vitest": "^3.2.4"
   },
-  "keywords": [],
-  "author": ""
+  "keywords": [
+    "mcp",
+    "rancher",
+    "fleet",
+    "claude",
+    "copilot",
+    "codex"
+  ],
+  "author": "Jasonrve"
 }

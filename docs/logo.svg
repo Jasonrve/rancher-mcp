@@ -1,16 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="rancher-mcp logo">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#0f172a"/>
+    <linearGradient id="outline" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
     <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="100%" stop-color="#22c55e"/>
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
-  <circle cx="128" cy="126" r="70" fill="none" stroke="url(#accent)" stroke-width="18" opacity="0.95"/>
-  <path d="M88 164V92h58c18 0 30 12 30 27 0 13-8 23-21 26l25 19h-28l-22-17h-18v17H88zm24-39h31c8 0 13-4 13-10 0-6-5-10-13-10h-31v20z" fill="#f8fafc"/>
-  <path d="M64 192h128" stroke="url(#accent)" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M68 88c-15-4-25-17-25-32 0-10 6-20 15-25 15 5 26 16 30 31" stroke="url(#outline)" stroke-width="12"/>
+    <path d="M188 88c15-4 25-17 25-32 0-10-6-20-15-25-15 5-26 16-30 31" stroke="url(#outline)" stroke-width="12"/>
+    <path d="M128 52c36 0 64 29 64 64 0 24-10 45-26 59v12c0 17-14 31-31 31s-31-14-31-31v-12c-16-14-26-35-26-59 0-35 28-64 64-64Z" fill="#f8fafc" stroke="url(#outline)" stroke-width="12"/>
+    <path d="M101 140c10 9 24 14 27 14s17-5 27-14" stroke="url(#accent)" stroke-width="10"/>
+    <circle cx="108" cy="118" r="7" fill="#0f172a"/>
+    <circle cx="148" cy="118" r="7" fill="#0f172a"/>
+    <path d="M106 162c11 8 33 8 44 0" stroke="#0f172a" stroke-width="8"/>
+    <path d="M80 206h96" stroke="url(#accent)" stroke-width="12"/>
+  </g>
 </svg>

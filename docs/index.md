@@ -4,9 +4,6 @@ hero:
   name: rancher-mcp
   text: Rancher tooling as a standalone MCP server
   tagline: A focused TypeScript MCP service for Rancher cluster, project, namespace, access-control, and Fleet workflows.
-  image:
-    src: /logo.svg
-    alt: rancher-mcp logo
   actions:
     - theme: brand
       text: Read the guide
@@ -22,8 +19,6 @@ features:
   - title: Built for agents
     details: The docs include practical examples for Claude, Copilot, and Codex clients.
 ---
-
-![rancher-mcp logo](./logo.svg)
 
 ## What this project is for
 

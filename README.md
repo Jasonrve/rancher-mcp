@@ -1,7 +1,7 @@
 # rancher-mcp
 
 <p align="center">
-  <img src="./docs/logo.svg" alt="rancher-mcp logo" width="180" />
+  <img src="./docs/logo.svg" alt="rancher-mcp logo" width="96" />
 </p>
 
 <p align="center">
@@ -47,6 +47,18 @@ npm install
 npm test
 npm run build
 npm run dev
+```
+
+## Beta publishing and install
+
+This repository is set up for a beta release channel on npm.
+
+- publish workflow: `.github/workflows/publish-beta.yml`
+- npm dist-tag: `beta`
+- local run via npx after publishing:
+
+```bash
+npx -y rancher-mcp@beta
 ```
 
 ## Configuration
