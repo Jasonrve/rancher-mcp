@@ -87,11 +87,11 @@ export class McpToolExecutor {
         return this.wrapJson({
           clusterId: this.requireString(argumentsObject, 'clusterId', 'cluster_id'),
           namespaceName: this.requireString(argumentsObject, 'namespaceName', 'name'),
-          createdByOperator: this.requireBool(argumentsObject, 'createdByOperator', 'created_by_operator'),
+          createdByMcp: this.requireBool(argumentsObject, 'createdByMcp', 'created_by_mcp'),
           updated: await this.rancherClient.ensureNamespaceManagedBy(
             this.requireString(argumentsObject, 'clusterId', 'cluster_id'),
             this.requireString(argumentsObject, 'namespaceName', 'name'),
-            this.requireBool(argumentsObject, 'createdByOperator', 'created_by_operator'),
+            this.requireBool(argumentsObject, 'createdByMcp', 'created_by_mcp'),
           ),
         });
 
@@ -130,6 +130,7 @@ export class McpToolExecutor {
           this.getString(argumentsObject, 'branch'),
           this.getStringArray(argumentsObject, 'paths'),
           this.getStringMap(argumentsObject, 'targets'),
+          this.getString(argumentsObject, 'namespaceName') ?? this.getString(argumentsObject, 'namespace'),
         ));
       case 'update_fleet_gitrepo':
         return this.wrapJson(await this.rancherClient.updateFleetGitRepo(
@@ -142,11 +143,26 @@ export class McpToolExecutor {
       case 'delete_fleet_gitrepo':
         return this.wrapJson({ deleted: await this.rancherClient.deleteFleetGitRepo(this.requireString(argumentsObject, 'id', 'gitRepoId', 'name', 'gitRepoName')) });
       case 'force_fleet_sync':
-        return this.wrapJson(await this.rancherClient.forceFleetSync(this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName')));
+        return this.wrapJson(await this.rancherClient.forceFleetSync(
+          this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName'),
+          this.getString(argumentsObject, 'repo'),
+          this.getString(argumentsObject, 'branch'),
+          this.getStringArray(argumentsObject, 'paths'),
+        ));
       case 'pause_fleet_gitrepo':
-        return this.wrapJson(await this.rancherClient.pauseFleetGitRepo(this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName')));
+        return this.wrapJson(await this.rancherClient.pauseFleetGitRepo(
+          this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName'),
+          this.getString(argumentsObject, 'repo'),
+          this.getString(argumentsObject, 'branch'),
+          this.getStringArray(argumentsObject, 'paths'),
+        ));
       case 'resume_fleet_gitrepo':
-        return this.wrapJson(await this.rancherClient.resumeFleetGitRepo(this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName')));
+        return this.wrapJson(await this.rancherClient.resumeFleetGitRepo(
+          this.requireString(argumentsObject, 'gitRepoId', 'id', 'name', 'gitRepoName'),
+          this.getString(argumentsObject, 'repo'),
+          this.getString(argumentsObject, 'branch'),
+          this.getStringArray(argumentsObject, 'paths'),
+        ));
       default:
         return this.wrapText(`Tool '${toolName}' is enabled but no executor was registered.`);
     }

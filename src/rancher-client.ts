@@ -50,7 +50,7 @@ export class RancherApiClient {
         clusterId,
         description: description ?? undefined,
         annotations: {
-          'app.kubernetes.io/managed-by': 'rancher-devops-operator',
+          'app.kubernetes.io/managed-by': 'rancher-mcp',
         },
       },
     });
@@ -58,7 +58,7 @@ export class RancherApiClient {
 
   async deleteProject(projectId: string): Promise<boolean> {
     const existing = await this.requestJson<{ annotations?: Record<string, string> }>(`/v3/projects/${encodeURIComponent(projectId)}`, { method: 'GET' });
-    if (existing.annotations?.['app.kubernetes.io/managed-by'] !== 'rancher-devops-operator') {
+    if (existing.annotations?.['app.kubernetes.io/managed-by'] !== 'rancher-mcp') {
       return false;
     }
 
@@ -74,11 +74,11 @@ export class RancherApiClient {
         name: namespaceName.toLowerCase(),
         projectId,
         annotations: {
-          'app.kubernetes.io/managed-by': 'rancher-devops-operator',
-          'app.kubernetes.io/created-by': 'rancher-devops-operator',
+          'app.kubernetes.io/managed-by': 'rancher-mcp',
+          'app.kubernetes.io/created-by': 'rancher-mcp',
         },
         labels: {
-          'app.kubernetes.io/managed-by': 'rancher-devops-operator',
+          'app.kubernetes.io/managed-by': 'rancher-mcp',
         },
       },
     });
@@ -105,11 +105,11 @@ export class RancherApiClient {
         projectId: newProjectId,
         labels: {
           ...(namespace.labels ?? {}),
-          'app.kubernetes.io/managed-by': 'rancher-devops-operator',
+          'app.kubernetes.io/managed-by': 'rancher-mcp',
         },
         annotations: {
           ...(namespace.annotations ?? {}),
-          'app.kubernetes.io/managed-by': 'rancher-devops-operator',
+          'app.kubernetes.io/managed-by': 'rancher-mcp',
           'field.cattle.io/projectId': newProjectId,
         },
       },
@@ -117,17 +117,29 @@ export class RancherApiClient {
   }
 
   async removeNamespaceFromProject(clusterId: string, namespaceName: string): Promise<boolean> {
-    const existing = await this.getNamespace(clusterId, namespaceName);
-    if (!existing) {
-      return false;
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      const existing = await this.getNamespace(clusterId, namespaceName);
+      if (!existing) {
+        return false;
+      }
+
+      try {
+        await this.requestJson(`/v3/clusters/${encodeURIComponent(clusterId)}/namespaces/${encodeURIComponent(namespaceName)}?action=move`, {
+          method: 'POST',
+          body: { projectId: '' },
+        });
+        return true;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (attempt < 5 && message.includes('object has been modified')) {
+          await new Promise((resolve) => setTimeout(resolve, attempt * 250));
+          continue;
+        }
+        throw error;
+      }
     }
 
-    await this.requestJson(`/v3/clusters/${encodeURIComponent(clusterId)}/namespaces/${encodeURIComponent(namespaceName)}?action=move`, {
-      method: 'POST',
-      body: { projectId: '' },
-    });
-
-    return true;
+    return false;
   }
 
   async listNamespacesByProject(projectId: string): Promise<unknown> {
@@ -137,7 +149,7 @@ export class RancherApiClient {
 
   async deleteNamespace(clusterId: string, namespaceName: string): Promise<boolean> {
     const existing = await this.requestJson<{ annotations?: Record<string, string> }>(`/v3/clusters/${encodeURIComponent(clusterId)}/namespaces/${encodeURIComponent(namespaceName)}`, { method: 'GET' });
-    if (existing.annotations?.['app.kubernetes.io/managed-by'] !== 'rancher-devops-operator') {
+    if (existing.annotations?.['app.kubernetes.io/managed-by'] !== 'rancher-mcp') {
       return false;
     }
 
@@ -145,7 +157,7 @@ export class RancherApiClient {
     return true;
   }
 
-  async ensureNamespaceManagedBy(clusterId: string, namespaceName: string, createdByOperator: boolean): Promise<boolean> {
+  async ensureNamespaceManagedBy(clusterId: string, namespaceName: string, createdByMcp: boolean): Promise<boolean> {
     const existing = await this.getNamespace(clusterId, namespaceName);
     if (!existing) {
       return false;
@@ -156,19 +168,19 @@ export class RancherApiClient {
     const annotations = { ...(namespace.annotations ?? {}) };
     let changed = false;
 
-    if (labels['app.kubernetes.io/managed-by'] !== 'rancher-devops-operator') {
-      labels['app.kubernetes.io/managed-by'] = 'rancher-devops-operator';
+    if (labels['app.kubernetes.io/managed-by'] !== 'rancher-mcp') {
+      labels['app.kubernetes.io/managed-by'] = 'rancher-mcp';
       changed = true;
     }
 
-    if (annotations['app.kubernetes.io/managed-by'] !== 'rancher-devops-operator') {
-      annotations['app.kubernetes.io/managed-by'] = 'rancher-devops-operator';
+    if (annotations['app.kubernetes.io/managed-by'] !== 'rancher-mcp') {
+      annotations['app.kubernetes.io/managed-by'] = 'rancher-mcp';
       changed = true;
     }
 
-    if (createdByOperator) {
-      if (annotations['app.kubernetes.io/created-by'] !== 'rancher-devops-operator') {
-        annotations['app.kubernetes.io/created-by'] = 'rancher-devops-operator';
+    if (createdByMcp) {
+      if (annotations['app.kubernetes.io/created-by'] !== 'rancher-mcp') {
+        annotations['app.kubernetes.io/created-by'] = 'rancher-mcp';
         changed = true;
       }
     } else if (annotations['app.kubernetes.io/created-by'] !== 'imported') {
@@ -236,7 +248,7 @@ export class RancherApiClient {
   }
 
   async getFleetGitRepo(repoId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}`, { method: 'GET' });
+    return await this.requestJson(this.buildFleetRepoPath(repoId), { method: 'GET' });
   }
 
   async listFleetBundles(): Promise<unknown> {
@@ -244,11 +256,11 @@ export class RancherApiClient {
   }
 
   async getFleetBundleStatus(bundleId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.bundles/${encodeURIComponent(bundleId)}`, { method: 'GET' });
+    return await this.requestJson(this.buildFleetBundlePath(bundleId), { method: 'GET' });
   }
 
   async getFleetSyncStatus(repoId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}`, { method: 'GET' });
+    return await this.requestJson(this.buildFleetRepoPath(repoId), { method: 'GET' });
   }
 
   async getFleetDeploymentErrors(repoId?: string): Promise<unknown> {
@@ -261,11 +273,15 @@ export class RancherApiClient {
     branch?: string | null,
     paths?: readonly string[] | null,
     targets?: Record<string, string> | null,
+    namespaceName?: string | null,
   ): Promise<unknown> {
     return await this.requestJson('/v1/fleet.cattle.io.gitrepos', {
       method: 'POST',
       body: {
         type: 'fleet.cattle.io.gitrepo',
+        metadata: {
+          namespace: namespaceName?.trim() || 'fleet-default',
+        },
         name,
         repo: repo ?? undefined,
         branch: branch ?? undefined,
@@ -282,48 +298,106 @@ export class RancherApiClient {
     branch?: string | null,
     paths?: readonly string[] | null,
   ): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}`, {
-      method: 'PUT',
-      body: {
-        id: repoId,
-        name: name ?? undefined,
-        repo: repo ?? undefined,
-        branch: branch ?? undefined,
-        paths: paths ?? undefined,
-      },
+    return await this.updateFleetGitRepoFields(repoId, repo, branch, paths, (spec) => {
+      if (name?.trim()) {
+        spec.name = name.trim();
+      }
     });
   }
 
   async deleteFleetGitRepo(repoId: string): Promise<boolean> {
-    await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}`, { method: 'DELETE' });
+    await this.requestJson(this.buildFleetRepoPath(repoId), { method: 'DELETE' });
     return true;
   }
 
-  async forceFleetSync(repoId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}?action=forceSync`, {
-      method: 'POST',
-      body: {},
+  async forceFleetSync(repoId: string, repo?: string | null, branch?: string | null, paths?: readonly string[] | null): Promise<unknown> {
+    return await this.updateFleetGitRepoFields(repoId, repo, branch, paths, (spec) => {
+      spec.forceSyncGeneration = Date.now();
+    }, false);
+  }
+
+  async pauseFleetGitRepo(repoId: string, repo?: string | null, branch?: string | null, paths?: readonly string[] | null): Promise<unknown> {
+    return await this.updateFleetGitRepoFields(repoId, repo, branch, paths, (spec) => {
+      spec.paused = true;
+    }, false, false);
+  }
+
+  async resumeFleetGitRepo(repoId: string, repo?: string | null, branch?: string | null, paths?: readonly string[] | null): Promise<unknown> {
+    return await this.updateFleetGitRepoFields(repoId, repo, branch, paths, (spec) => {
+      spec.paused = false;
+    }, false, false);
+  }
+
+  private buildFleetRepoPath(repoId: string): string {
+    const [namespace, name] = this.splitFleetId(repoId, 'fleet-default');
+    return `/apis/fleet.cattle.io/v1alpha1/namespaces/${encodeURIComponent(namespace)}/gitrepos/${encodeURIComponent(name)}`;
+  }
+
+  private buildFleetBundlePath(bundleId: string): string {
+    const [namespace, name] = this.splitFleetId(bundleId, 'fleet-default');
+    return `/apis/fleet.cattle.io/v1alpha1/namespaces/${encodeURIComponent(namespace)}/bundles/${encodeURIComponent(name)}`;
+  }
+
+  private async updateFleetGitRepoFields(
+    repoId: string,
+    repo: string | null | undefined,
+    branch: string | null | undefined,
+    paths: readonly string[] | null | undefined,
+    mutateSpec: (spec: Record<string, unknown>) => void,
+    requireCoreFields = true,
+    readResponseBody = true,
+  ): Promise<unknown> {
+    const current = await this.requestJson<any>(this.buildFleetRepoPath(repoId), { method: 'GET' });
+    const metadata = (current?.metadata ?? {}) as Record<string, unknown>;
+    const spec = { ...((current?.spec ?? {}) as Record<string, unknown>) };
+
+    const currentRepo = (current?.spec as Record<string, unknown> | undefined)?.repo ?? (current as Record<string, unknown>)?.repo;
+    const currentBranch = (current?.spec as Record<string, unknown> | undefined)?.branch ?? (current as Record<string, unknown>)?.branch;
+    const currentPaths = (current?.spec as Record<string, unknown> | undefined)?.paths ?? (current as Record<string, unknown>)?.paths;
+
+    if (repo !== undefined && repo !== null) spec.repo = repo;
+    else if (!('repo' in spec) && currentRepo !== undefined) spec.repo = currentRepo;
+    if (branch !== undefined && branch !== null) spec.branch = branch;
+    else if (!('branch' in spec) && currentBranch !== undefined) spec.branch = currentBranch;
+    if (paths !== undefined && paths !== null) spec.paths = [...paths];
+    else if (!('paths' in spec) && currentPaths !== undefined) spec.paths = Array.isArray(currentPaths) ? [...currentPaths as unknown[]].map(String) : currentPaths;
+    mutateSpec(spec);
+
+    if (requireCoreFields && (!('repo' in spec) || !('branch' in spec) || !('paths' in spec))) {
+      throw new Error(`Fleet GitRepo ${repoId} update requires repo, branch, and paths`);
+    }
+
+    const body = {
+      apiVersion: (current?.apiVersion ?? 'fleet.cattle.io/v1alpha1') as string,
+      kind: (current?.kind ?? 'GitRepo') as string,
+      metadata: {
+        namespace: (metadata.namespace ?? this.splitFleetId(repoId, 'fleet-default')[0]) as string,
+        name: (metadata.name ?? this.splitFleetId(repoId, 'fleet-default')[1]) as string,
+        resourceVersion: metadata.resourceVersion as string,
+      },
+      spec,
+    };
+
+    return await this.requestJson(this.buildFleetRepoPath(repoId), {
+      method: 'PUT',
+      body,
+      allowNotFound: false,
     });
   }
 
-  async pauseFleetGitRepo(repoId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}?action=pause`, {
-      method: 'POST',
-      body: {},
-    });
-  }
+  private splitFleetId(repoId: string, defaultNamespace: string): [string, string] {
+    const slash = repoId.indexOf('/');
+    if (slash > 0 && slash + 1 < repoId.length) {
+      return [repoId.slice(0, slash), repoId.slice(slash + 1)];
+    }
 
-  async resumeFleetGitRepo(repoId: string): Promise<unknown> {
-    return await this.requestJson(`/v1/fleet.cattle.io.gitrepos/${encodeURIComponent(repoId)}?action=resume`, {
-      method: 'POST',
-      body: {},
-    });
+    return [defaultNamespace, repoId];
   }
 
   private async requestJson<T = unknown>(path: string, init: RequestConfig): Promise<T> {
     const response = await this.fetchImpl(new URL(path, this.options.baseUrl), {
       method: init.method,
-      headers: this.buildHeaders(init.body),
+      headers: await this.buildHeaders(init.body),
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
     });
 
@@ -344,11 +418,11 @@ export class RancherApiClient {
     return JSON.parse(text) as T;
   }
 
-  private buildHeaders(body: unknown): Headers {
+  private async buildHeaders(body: unknown): Promise<Headers> {
     const headers = new Headers();
     headers.set('accept', 'application/json');
 
-    const authorization = this.options.authService.getAuthorizationHeader();
+    const authorization = await this.options.authService.getAuthorizationHeader();
     if (authorization) {
       headers.set('authorization', authorization);
     }

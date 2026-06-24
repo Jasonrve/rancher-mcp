@@ -17,7 +17,7 @@ const toolCases = [
   { toolName: 'namespace_remove_project', methodName: 'removeNamespaceFromProject', args: { clusterId: 'c-1', namespaceName: 'demo-ns' }, returns: true, expectedFragment: '"removed": true' },
   { toolName: 'namespace_list_by_project', methodName: 'listNamespacesByProject', args: { projectId: 'c-1:p-1' }, returns: [{ id: 'n-1', name: 'demo-ns' }], expectedFragment: 'demo-ns' },
   { toolName: 'namespace_delete', methodName: 'deleteNamespace', args: { clusterId: 'c-1', namespaceName: 'demo-ns' }, returns: true, expectedFragment: '"deleted": true' },
-  { toolName: 'namespace_ensure_managed_by', methodName: 'ensureNamespaceManagedBy', args: { clusterId: 'c-1', namespaceName: 'demo-ns', createdByOperator: true }, returns: true, expectedFragment: '"updated": true' },
+  { toolName: 'namespace_ensure_managed_by', methodName: 'ensureNamespaceManagedBy', args: { clusterId: 'c-1', namespaceName: 'demo-ns', createdByMcp: true }, returns: true, expectedFragment: '"updated": true' },
   { toolName: 'project_member_create', methodName: 'createProjectMember', args: { projectId: 'c-1:p-1', principalId: 'u-1', role: 'project-member' }, returns: { id: 'b-1' }, expectedFragment: 'b-1' },
   { toolName: 'project_member_list', methodName: 'listProjectMembers', args: { projectId: 'c-1:p-1' }, returns: [{ id: 'b-1' }], expectedFragment: 'b-1' },
   { toolName: 'project_member_delete', methodName: 'deleteProjectMember', args: { bindingId: 'b-1' }, returns: true, expectedFragment: '"deleted": true' },
@@ -50,19 +50,26 @@ describe('rancher-mcp tool coverage', () => {
       const executor = new McpToolExecutor(new McpToolCatalog(), client as RancherApiClient);
       const result = await executor.execute(toolCase.toolName, toolCase.args as Record<string, unknown> | undefined);
 
-      expect(client.__calls).toEqual([{ method: toolCase.methodName, args: expectedCallArgs(toolCase.args) }]);
+      expect(client.__calls).toEqual([{ method: toolCase.methodName, args: expectedCallArgs(toolCase.args, toolCase.toolName) }]);
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain(toolCase.expectedFragment);
     });
   });
 });
 
-function expectedCallArgs(args: Record<string, unknown> | undefined): unknown[] {
+function expectedCallArgs(args: Record<string, unknown> | undefined, toolName?: string): unknown[] {
   if (!args) {
-    return [];
+    return toolName === 'create_fleet_gitrepo' ? [undefined] : [];
   }
 
-  return Object.values(args);
+  const values = Object.values(args);
+  if (toolName === 'create_fleet_gitrepo') {
+    return [...values, undefined];
+  }
+  if (toolName === 'force_fleet_sync' || toolName === 'pause_fleet_gitrepo' || toolName === 'resume_fleet_gitrepo') {
+    return [...values, undefined, undefined, undefined];
+  }
+  return values;
 }
 
 function createClientMock(returns: Record<string, unknown>) {

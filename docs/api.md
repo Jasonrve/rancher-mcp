@@ -2,7 +2,7 @@
 
 ## Tool catalog
 
-The catalog intentionally matches the Rancher-only MCP surface from `rancher-devops-operator`.
+The catalog matches the Rancher MCP surface from the original C# implementation.
 
 ### Rancher tools
 

@@ -1,10 +1,10 @@
 # rancher-mcp
 
-A TypeScript MCP server that ports the Rancher-side MCP tools from `rancher-devops-operator` into a standalone package.
+A TypeScript MCP server for Rancher workflows.
 
 ## What it does
 
-- exposes the Rancher-only MCP tool catalog
+- exposes the Rancher MCP tool catalog
 - forwards the incoming `Authorization` header to Rancher
 - falls back to configured Rancher credentials when no header is present
 - supports HTTP and stdio transports
@@ -46,8 +46,10 @@ npm run dev
 
 The site is under `docs/` and is configured for GitHub Pages with the repo slug base path.
 
-## Upstream reference
+- [Guide](./docs/guide.md)
+- [Client configuration examples](./docs/clients.md)
+- [API reference](./docs/api.md)
 
-This repo mirrors the MCP portion of:
+## Source project
 
-- https://github.com/Jasonrve/rancher-devops-operator/tree/fix/mcp-principal-lookup
+This repo mirrors the Rancher-side MCP surface from the original C# implementation.

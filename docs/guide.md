@@ -51,8 +51,12 @@ npm run build
 npm run docs:build
 ```
 
+## Client examples
+
+See [client configuration examples](./clients.md) for Claude Code, Claude CLI, VS Code Copilot, Copilot CLI, Codex, and Codex CLI setup snippets.
+
 ## Design notes
 
 - The incoming `Authorization` header is used first.
 - If the request has no header, the client falls back to `RANCHER_TOKEN` or `RANCHER_USERNAME` + `RANCHER_PASSWORD`.
-- Tool names are kept aligned with the C# implementation so existing MCP prompts can migrate without renaming.
+- Tool names are kept aligned with the source implementation so existing MCP prompts can migrate without renaming.

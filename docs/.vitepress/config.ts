@@ -8,6 +8,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide' },
+      { text: 'Clients', link: '/clients' },
       { text: 'API', link: '/api' },
     ],
     sidebar: [
@@ -15,6 +16,7 @@ export default defineConfig({
         text: 'Docs',
         items: [
           { text: 'Guide', link: '/guide' },
+          { text: 'Clients', link: '/clients' },
           { text: 'API', link: '/api' },
         ],
       },

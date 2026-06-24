@@ -2,18 +2,18 @@
 layout: home
 hero:
   name: rancher-mcp
-  text: Rancher tools, without the operator runtime
+  text: Rancher tools, without the Kubernetes runtime
   tagline: TypeScript MCP server with pass-through auth, tests, and GitHub Pages docs.
   actions:
     - theme: brand
       text: Read the guide
       link: /guide
     - theme: alt
-      text: API reference
-      link: /api
+      text: Client examples
+      link: /clients
 features:
   - title: Rancher-only surface
-    details: Ports the MCP tool catalog from rancher-devops-operator without the Kubernetes operator.
+    details: Ports the MCP tool catalog into a standalone TypeScript server.
   - title: Pass-through authorization
     details: Incoming Authorization headers are forwarded to Rancher before falling back to configured credentials.
   - title: VitePress docs
@@ -22,6 +22,6 @@ features:
 
 ## What this repo is
 
-`rancher-mcp` is a TypeScript MCP server for Rancher workflows. It mirrors the Rancher-side MCP tools from `rancher-devops-operator`, but drops the operator/Kubernetes runtime and keeps the implementation focused on MCP + Rancher API calls.
+`rancher-mcp` is a TypeScript MCP server for Rancher workflows. It focuses on MCP + Rancher API calls and leaves out the surrounding Kubernetes runtime.
 
-Use the guide for local development and the API page for the tool inventory.
+Use the guide for local development, the client examples for Claude/Copilot/Codex setup, and the API page for the tool inventory.

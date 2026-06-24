@@ -23,7 +23,7 @@ const TOOLS: readonly McpToolDefinition[] = [
   { name: 'namespace_remove_project', description: 'Remove a namespace from its Rancher project.', readOnly: false, category: 'rancher' },
   { name: 'namespace_list_by_project', description: 'List namespaces for a Rancher project.', readOnly: true, category: 'rancher' },
   { name: 'namespace_delete', description: 'Delete a namespace from a Rancher cluster.', readOnly: false, category: 'rancher' },
-  { name: 'namespace_ensure_managed_by', description: 'Mark a namespace as managed or unmanaged by the operator.', readOnly: false, category: 'rancher' },
+  { name: 'namespace_ensure_managed_by', description: 'Mark a namespace as managed or unmanaged by rancher-mcp.', readOnly: false, category: 'rancher' },
 
   { name: 'project_member_create', description: 'Add a member to a Rancher project.', readOnly: false, category: 'rancher' },
   { name: 'project_member_list', description: 'List Rancher project members.', readOnly: true, category: 'rancher' },

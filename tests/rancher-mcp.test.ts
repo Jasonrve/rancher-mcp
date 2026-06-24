@@ -80,30 +80,38 @@ describe('rancher-mcp', () => {
   it('prefers the incoming Authorization header and falls back to credentials', async () => {
     const authContext = new RancherRequestAuthContext();
     const authService = new RancherAuthService(authContext, {
+      baseUrl: 'https://rancher.example.com',
       token: 'fallback-token',
       username: 'admin',
       password: 'secret',
     });
 
     await authContext.run('Bearer inbound-token', async () => {
-      expect(authService.getAuthorizationHeader()).toBe('Bearer inbound-token');
+      await expect(authService.getAuthorizationHeader()).resolves.toBe('Bearer inbound-token');
     });
 
     await authContext.run(undefined, async () => {
-      expect(authService.getAuthorizationHeader()).toBe('Bearer fallback-token');
+      await expect(authService.getAuthorizationHeader()).resolves.toBe('Bearer fallback-token');
     });
 
-    const basicService = new RancherAuthService(new RancherRequestAuthContext(), {
+    const loginFetch = vi.fn(async () => new Response(JSON.stringify({ token: 'created-token' }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    }));
+    const loginService = new RancherAuthService(new RancherRequestAuthContext(), {
+      baseUrl: 'https://rancher.example.com',
       username: 'admin',
       password: 'secret',
+      fetchImpl: loginFetch,
     });
 
-    expect(basicService.getAuthorizationHeader()).toBe('Basic YWRtaW46c2VjcmV0');
+    await expect(loginService.getAuthorizationHeader()).resolves.toBe('Bearer created-token');
+    expect(loginFetch).toHaveBeenCalledOnce();
   });
 
   it('sends the active Authorization header to Rancher API calls', async () => {
     const authContext = new RancherRequestAuthContext();
-    const authService = new RancherAuthService(authContext, {});
+    const authService = new RancherAuthService(authContext, { baseUrl: 'https://rancher.example.com' });
     const observedHeaders: string[] = [];
 
     const fetchImpl: typeof fetch = vi.fn(async (input, init) => {

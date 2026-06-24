@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolResult, type Tool } from '@modelcontextprotocol/sdk/types.js';
@@ -18,9 +19,11 @@ export interface RancherMcpServerOptions {
 export function createRancherMcpServer(options: RancherMcpServerOptions) {
   const authContext = new RancherRequestAuthContext();
   const authService = new RancherAuthService(authContext, {
+    baseUrl: options.baseUrl,
     token: options.token,
     username: options.username,
     password: options.password,
+    fetchImpl: options.fetchImpl,
   });
   const catalog = new McpToolCatalog();
   const client = new RancherApiClient({
@@ -48,7 +51,7 @@ export function createRancherMcpServer(options: RancherMcpServerOptions) {
   });
 
   const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
+    sessionIdGenerator: () => randomUUID(),
     enableJsonResponse: true,
   });
 

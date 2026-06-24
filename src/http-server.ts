@@ -26,10 +26,33 @@ export async function createRancherMcpHttpServer(options: RancherMcpHttpServerOp
     }
 
     const authorization = typeof req.headers.authorization === 'string' ? req.headers.authorization : undefined;
+    const parsedBody = await readRequestBody(req);
     await runtime.authContext.run(authorization, async () => {
-      await runtime.transport.handleRequest(req, res);
+      await runtime.transport.handleRequest(req, res, parsedBody);
     });
   });
+
+  async function readRequestBody(req: http.IncomingMessage): Promise<unknown> {
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      return undefined;
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+
+    if (chunks.length === 0) {
+      return undefined;
+    }
+
+    const raw = Buffer.concat(chunks).toString('utf8').trim();
+    if (!raw) {
+      return undefined;
+    }
+
+    return JSON.parse(raw) as unknown;
+  }
 
   return {
     httpServer,
