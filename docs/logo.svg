@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="rancher-mcp logo">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
+  <circle cx="128" cy="126" r="70" fill="none" stroke="url(#accent)" stroke-width="18" opacity="0.95"/>
+  <path d="M88 164V92h58c18 0 30 12 30 27 0 13-8 23-21 26l25 19h-28l-22-17h-18v17H88zm24-39h31c8 0 13-4 13-10 0-6-5-10-13-10h-31v20z" fill="#f8fafc"/>
+  <path d="M64 192h128" stroke="url(#accent)" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+</svg>

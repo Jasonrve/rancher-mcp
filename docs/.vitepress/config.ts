@@ -2,10 +2,11 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'rancher-mcp',
-  description: 'TypeScript MCP server for Rancher-only tools.',
+  description: 'TypeScript MCP server for Rancher workflows.',
   base: '/rancher-mcp/',
   lang: 'en-US',
   themeConfig: {
+    logo: '/logo.svg',
     nav: [
       { text: 'Guide', link: '/guide' },
       { text: 'Clients', link: '/clients' },

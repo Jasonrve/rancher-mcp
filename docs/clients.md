@@ -2,8 +2,16 @@
 
 Use the same MCP server definition everywhere; only the client wrapper changes.
 
-- Use the **HTTP** form when the client can point at a URL.
-- Use the **stdio** form when the client launches a local process.
+## Quick recommendation
+
+| Client | Best transport | Why |
+| --- | --- | --- |
+| Claude Code | stdio | It can launch the server locally for you |
+| Claude CLI | stdio | Simple local process integration |
+| VS Code Copilot | HTTP | Easy to connect to a running server |
+| Copilot CLI | stdio | Works well with a launched process |
+| Codex | HTTP or stdio | Choose whichever matches your workflow |
+| Codex CLI | stdio | Best fit for local process launch |
 
 ## Shared server definitions
 
@@ -77,7 +85,7 @@ Use the same stdio form in the Claude CLI MCP configuration.
 
 ## VS Code Copilot
 
-VS Code Copilot is a good fit for the HTTP form because the editor can connect directly to the running server. Put this in the MCP config file used by your VS Code installation, such as `.vscode/mcp.json` when that workflow is supported.
+VS Code Copilot is a good fit for the HTTP form because the editor can connect directly to the running server.
 
 ```json
 {

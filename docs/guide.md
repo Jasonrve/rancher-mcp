@@ -1,14 +1,42 @@
 # Guide
 
-## What is included
+## What this project includes
 
-- TypeScript MCP server
-- Rancher REST client
-- pass-through `Authorization` handling
-- stdio transport for local MCP clients
-- HTTP transport for remote/hosted use
-- VitePress docs for GitHub Pages
-- Vitest coverage for catalog, auth, executor, and HTTP health behavior
+- TypeScript MCP server for Rancher workflows
+- Rancher REST client with caller-aware auth forwarding
+- HTTP transport for hosted use
+- stdio transport for local agent clients
+- Vitest coverage for catalog, auth, executor, and health behavior
+- Documentation site with client setup examples
+
+## What problem it solves
+
+If you need Rancher API access from an MCP-compatible agent, this repository gives you a focused server instead of a full operator runtime. That keeps the surface smaller, easier to run, and easier to connect to tools like Claude, Copilot, and Codex.
+
+## Tool families
+
+### Rancher core
+
+These tools cover the day-to-day life cycle of Rancher resources:
+
+- cluster discovery and kubeconfig retrieval
+- project lookup, creation, and deletion
+- namespace creation, movement, and cleanup
+
+### Access control
+
+These tools help you find principals and attach them to a project:
+
+- principal lookup by name
+- project member creation, listing, and deletion
+
+### Fleet
+
+These tools manage GitOps resources and sync state:
+
+- GitRepo listing, creation, update, deletion, pause/resume
+- bundle status and sync status lookups
+- deployment error inspection
 
 ## Local development
 
