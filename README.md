@@ -1,7 +1,7 @@
 # rancher-mcp
 
 <p align="center">
-  <img src="./docs/logo.svg" alt="rancher-mcp logo" width="96" />
+  <img src="./docs/public/logo-wordmark.png" alt="rancher-mcp logo" width="560" />
 </p>
 
 <p align="center">
@@ -18,6 +18,12 @@
 A polished TypeScript MCP server for Rancher workflows.
 
 It exposes the Rancher tool surface as a standalone MCP service, forwards caller identity when available, and falls back to configured Rancher credentials when needed. The repo includes tests, a documentation site, and GitHub Pages publishing.
+
+## Live docs
+
+- GitHub Pages site: `https://jasonrve.github.io/rancher-mcp/`
+- Docs source: [`docs/`](./docs)
+- Brand assets: [`docs/public/`](./docs/public)
 
 ## Why this exists
 

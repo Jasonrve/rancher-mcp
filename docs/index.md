@@ -3,7 +3,10 @@ layout: home
 hero:
   name: rancher-mcp
   text: Rancher tooling as a standalone MCP server
-  tagline: A focused TypeScript MCP service for Rancher cluster, project, namespace, access-control, and Fleet workflows.
+  tagline: A focused TypeScript MCP service for Rancher cluster, project, namespace, access-control, and Fleet workflows — published on GitHub Pages.
+  image:
+    src: /logo-wordmark.png
+    alt: rancher-mcp logo
   actions:
     - theme: brand
       text: Read the guide

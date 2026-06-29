@@ -11,6 +11,7 @@
   "files": [
     "dist",
     "docs/*.md",
+    "docs/public/*.png",
     "docs/logo.svg",
     "docs/.vitepress/config.ts",
     "README.md",
